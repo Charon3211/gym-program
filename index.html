@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Jihan's 5-Day Gym Program</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0f;
+    --bg2: #141417;
+    --bg3: #1a1a1f;
+    --card: #1e1e24;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #f0f0f2;
+    --muted: rgba(255,255,255,0.45);
+    --muted2: rgba(255,255,255,0.25);
+    --push: #f97316;
+    --pull: #3b82f6;
+    --legs: #22c55e;
+    --upper: #ec4899;
+    --arms: #a855f7;
+    --rest: #6b7280;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* HEADER */
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(13,13,15,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    z-index: 100;
+  }
+  .logo { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+  .logo span { color: var(--arms); }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .badge { font-size: 12px; background: rgba(168,85,247,0.15); color: var(--arms); border: 1px solid rgba(168,85,247,0.3); padding: 4px 10px; border-radius: 100px; white-space: nowrap; }
+  .gym-time {
+    font-size: 12px;
+    background: rgba(249,115,22,0.12);
+    color: var(--push);
+    border: 1px solid rgba(249,115,22,0.3);
+    padding: 4px 10px;
+    border-radius: 100px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .gym-time::before { content: '⏰'; font-size: 11px; }
+
+  /* HERO */
+  .hero {
+    padding: 32px 20px 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    animation: fadeDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .hero h1 {
+    font-size: clamp(26px, 5vw, 52px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .hero h1 em { font-style: normal; color: var(--arms); }
+  .hero p { font-size: 14px; color: var(--muted); max-width: 500px; }
+  .hero-stats {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-val { font-size: 20px; font-weight: 700; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* DAY NAV */
+  .day-nav {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    animation: fadeUp 0.6s 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    padding-bottom: 16px;
+  }
+  .day-nav::-webkit-scrollbar { display: none; }
+  .day-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 72px;
+    flex-shrink: 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .day-btn::after {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: currentColor; opacity: 0; transition: opacity 0.3s ease; z-index: 0;
+  }
+  .day-btn:active { transform: scale(0.95); }
+  .day-btn.active { border-color: currentColor; background: color-mix(in srgb, currentColor 12%, transparent); box-shadow: 0 0 20px color-mix(in srgb, currentColor 20%, transparent); }
+  .day-btn > * { position: relative; z-index: 1; }
+  .day-btn .day-short { font-size: 10px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.3s; }
+  .day-btn.active .day-short { color: currentColor; opacity: 0.8; }
+  .day-btn .day-name { font-size: 13px; font-weight: 600; }
+  
+  .day-btn.push-btn { color: var(--push); }
+  .day-btn.pull-btn { color: var(--pull); }
+  .day-btn.legs-btn { color: var(--legs); }
+  .day-btn.rest-btn { color: var(--rest); }
+  .day-btn.upper-btn { color: var(--upper); }
+  .day-btn.arms-btn { color: var(--arms); }
+
+  /* MAIN CONTENT */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px 80px;
+  }
+
+  .day-section { display: none; }
+  .day-section.active { display: block; }
+
+  .day-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    opacity: 0;
+    animation: fadeRight 0.5s 0.1s forwards;
+  }
+  .day-icon {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .day-section.active .day-icon { animation: popIn 0.5s 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0); }
+  .day-header-text h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .day-header-text p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  .day-tip {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border-left: 3px solid;
+    font-size: 13px;
+    line-height: 1.6;
+    opacity: 0;
+    animation: fadeUp 0.5s 0.2s forwards;
+  }
+
+  /* EXERCISE LIST — mobile-first single column */
+  .exercise-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Card: horizontal layout for mobile */
+  .ex-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    opacity: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    transition: border-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ex-card.expanded { flex-direction: column; }
+  .ex-card:active { border-color: var(--border2); }
+
+  /* Left: image thumbnail */
+  .ex-img-wrap {
+    width: 90px;
+    min-width: 90px;
+    height: 90px;
+    overflow: hidden;
+    background: var(--bg3);
+    position: relative;
+    flex-shrink: 0;
+    border-radius: 14px 0 0 14px;
+  }
+  .ex-card.expanded .ex-img-wrap {
+    width: 100%;
+    min-width: unset;
+    height: 200px;
+    border-radius: 14px 14px 0 0;
+  }
+  .ex-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .ex-img-fallback {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 4px;
+    background: linear-gradient(135deg, var(--bg3), var(--bg2));
+  }
+  .ex-img-fallback .fallback-icon { font-size: 28px; opacity: 0.4; }
+  .ex-img-fallback .fallback-text { font-size: 10px; color: var(--muted2); text-align: center; padding: 0 4px; display: none; }
+
+  /* Num badge on image */
+  .ex-num-badge {
+    position: absolute; top: 6px; left: 6px;
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.1);
+    z-index: 2;
+  }
+
+  /* Right: body */
+  .ex-body {
+    padding: 12px 14px;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+  }
+  .ex-card.expanded .ex-body { padding: 14px 16px; }
+
+  .ex-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .ex-name { font-size: 14px; font-weight: 600; line-height: 1.3; flex: 1; }
+  .ex-card.expanded .ex-name { font-size: 16px; }
+  .ex-sets-badge {
+    font-size: 11px; font-weight: 600;
+    background: rgba(255,255,255,0.08);
+    padding: 3px 8px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.1);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .ex-muscle { font-size: 11px; color: var(--muted); }
+  .ex-card.expanded .ex-muscle { font-size: 12px; }
+
+  .ex-expand-hint { font-size: 11px; color: var(--muted2); margin-top: 4px; }
+  .ex-card.expanded .ex-expand-hint { display: none; }
+
+  .ex-how {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.65;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 10px;
+    display: none;
+  }
+  .ex-card.expanded .ex-how { display: block; }
+  .ex-how strong { color: var(--text); font-weight: 600; }
+
+  /* REST DAY */
+  .rest-section {
+    text-align: center;
+    padding: 60px 16px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.1s forwards;
+  }
+  .rest-section .rest-emoji { font-size: 56px; margin-bottom: 16px; animation: float 3s ease-in-out infinite; display: block; }
+  .rest-section h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .rest-section p { color: var(--muted); max-width: 360px; margin: 0 auto; font-size: 14px; }
+  .rest-tips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .rest-tip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 13px;
+    text-align: left;
+    opacity: 0;
+    animation: fadeUp 0.5s forwards;
+  }
+  .rest-tip:nth-child(1) { animation-delay: 0.2s; }
+  .rest-tip:nth-child(2) { animation-delay: 0.3s; }
+  .rest-tip:nth-child(3) { animation-delay: 0.4s; }
+  .rest-tip:nth-child(4) { animation-delay: 0.5s; }
+  .rest-tip .rt-icon { font-size: 22px; margin-bottom: 6px; }
+  .rest-tip .rt-label { font-weight: 600; margin-bottom: 2px; font-size: 13px; }
+  .rest-tip .rt-sub { font-size: 12px; color: var(--muted); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeRight { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 70% { transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+  /* Desktop grid */
+  @media (min-width: 640px) {
+    .exercise-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .ex-card {
+      flex-direction: column;
+    }
+    .ex-img-wrap {
+      width: 100%;
+      min-width: unset;
+      height: 180px;
+      border-radius: 14px 14px 0 0;
+    }
+    .ex-body { padding: 14px 16px; justify-content: flex-start; }
+    .ex-how { display: block; }
+    .ex-expand-hint { display: none; }
+    .ex-img-fallback .fallback-text { display: block; }
+    .main { padding: 0 40px 80px; }
+    .hero { padding: 48px 40px 32px; }
+    .day-nav { padding: 0 40px 24px; flex-wrap: wrap; overflow-x: visible; }
+    .day-btn { min-width: 90px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">Jihan's <span>Gym</span></div>
+  <div class="header-right">
+    <div class="gym-time">7 – 9 AM</div>
+    <div class="badge">5 Days/Week</div>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Train hard.<br>Look <em>different.</em></h1>
+  <p>Full 5-day program built for width, V-taper, and staying lean. Gym 7–9 AM, no wasted time.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-val" style="color:var(--arms)">5</span><span class="stat-label">Days/Week</span></div>
+    <div class="stat"><span class="stat-val" style="color:var(--push)">7–9AM</span><span class="stat-label">Gym Time</span></div>
+    <div class="stat"><span class="stat-val" style="color:var(--legs)">40+</span><span class="stat-label">Exercises</span></div>
+    <div class="stat"><span class="stat-val" style="color:var(--pull)">PPL+</span><span class="stat-label">Split</span></div>
+  </div>
+</section>
+
+<nav class="day-nav">
+  <button class="day-btn push-btn active" onclick="showDay('push',this)">
+    <span class="day-short">Mon</span>
+    <span class="day-name">Push</span>
+  </button>
+  <button class="day-btn pull-btn" onclick="showDay('pull',this)">
+    <span class="day-short">Tue</span>
+    <span class="day-name">Pull</span>
+  </button>
+  <button class="day-btn legs-btn" onclick="showDay('legs',this)">
+    <span class="day-short">Wed</span>
+    <span class="day-name">Legs</span>
+  </button>
+  <button class="day-btn rest-btn" onclick="showDay('rest1',this)">
+    <span class="day-short">Thu</span>
+    <span class="day-name">Rest</span>
+  </button>
+  <button class="day-btn upper-btn" onclick="showDay('upper',this)">
+    <span class="day-short">Fri</span>
+    <span class="day-name">Upper</span>
+  </button>
+  <button class="day-btn arms-btn" onclick="showDay('arms',this)">
+    <span class="day-short">Sat</span>
+    <span class="day-name">Arms</span>
+  </button>
+  <button class="day-btn rest-btn" onclick="showDay('rest2',this)">
+    <span class="day-short">Sun</span>
+    <span class="day-name">Rest</span>
+  </button>
+</nav>
+
+<main class="main">
+
+<div id="day-push" class="day-section active">
+  <div class="day-header">
+    <div class="day-icon" style="background:rgba(249,115,22,0.15); color:var(--push)">🔥</div>
+    <div class="day-header-text">
+      <h2 style="color:var(--push)">Push Day — Monday</h2>
+      <p>Chest · Shoulders · Triceps</p>
+    </div>
+  </div>
+  <div class="day-tip" style="background:rgba(249,115,22,0.08); border-color:var(--push); color:rgba(255,255,255,0.75)">
+    <strong style="color:var(--push)">Pro tip:</strong> Lateral raises are your #1 width builder — do them every push session, 5 sets. Lead with your elbow, not your hand. Control the descent 2 seconds down.
+  </div>
+  <div class="exercise-grid" id="push-grid"></div>
+</div>
+
+<div id="day-pull" class="day-section">
+  <div class="day-header">
+    <div class="day-icon" style="background:rgba(59,130,246,0.15); color:var(--pull)">💪</div>
+    <div class="day-header-text">
+      <h2 style="color:var(--pull)">Pull Day — Tuesday</h2>
+      <p>Back · Biceps · Rear Delts</p>
+    </div>
+  </div>
+  <div class="day-tip" style="background:rgba(59,130,246,0.08); border-color:var(--pull); color:rgba(255,255,255,0.75)">
+    <strong style="color:var(--pull)">Pro tip:</strong> Deadlift goes first while you're fully fresh. Dead hangs at the end — 2-3 sets to failure. Best thing for your grip and shoulder health.
+  </div>
+  <div class="exercise-grid" id="pull-grid"></div>
+</div>
+
+<div id="day-legs" class="day-section">
+  <div class="day-header">
+    <div class="day-icon" style="background:rgba(34,197,94,0.15); color:var(--legs)">🦵</div>
+    <div class="day-header-text">
+      <h2 style="color:var(--legs)">Leg Day — Wednesday</h2>
+      <p>Quads · Hamstrings · Glutes · Calves</p>
+    </div>
+  </div>
+  <div class="day-tip" style="background:rgba(34,197,94,0.08); border-color:var(--legs); color:rgba(255,255,255,0.75)">
+    <strong style="color:var(--legs)">Pro tip:</strong> Big leg compounds drive testosterone — don't skip this thinking it doesn't help your upper body. It does, significantly. Squat deep, control the eccentric.
+  </div>
+  <div class="exercise-grid" id="legs-grid"></div>
+</div>
+
+<div id="day-rest1" class="day-section">
+  <div class="rest-section">
+    <span class="rest-emoji">😴</span>
+    <h2>Rest Day — Thursday</h2>
+    <p>Muscle grows when you rest, not when you train. Eat your protein, sleep well, show up harder tomorrow.</p>
+    <div class="rest-tips">
+      <div class="rest-tip"><div class="rt-icon">🥩</div><div class="rt-label">Hit protein</div><div class="rt-sub">2g per kg bodyweight. Don't slack on rest days.</div></div>
+      <div class="rest-tip"><div class="rt-icon">💧</div><div class="rt-label">Hydrate</div><div class="rt-sub">3+ litres. More if you sweated hard yesterday.</div></div>
+      <div class="rest-tip"><div class="rt-icon">😴</div><div class="rt-label">Sleep 8hrs</div><div class="rt-sub">Growth hormone peaks during deep sleep.</div></div>
+      <div class="rest-tip"><div class="rt-icon">🚶</div><div class="rt-label">Light walk</div><div class="rt-sub">Optional. Keeps blood flowing, reduces soreness.</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="day-upper" class="day-section">
+  <div class="day-header">
+    <div class="day-icon" style="background:rgba(236,72,153,0.15); color:var(--upper)">⚡</div>
+    <div class="day-header-text">
+      <h2 style="color:var(--upper)">Upper Day — Friday</h2>
+      <p>Heavy compounds — second hit for chest & back</p>
+    </div>
+  </div>
+  <div class="day-tip" style="background:rgba(236,72,153,0.08); border-color:var(--upper); color:rgba(255,255,255,0.75)">
+    <strong style="color:var(--upper)">Pro tip:</strong> Second chest and back stimulus of the week. Go heavy but save some in the tank — shoulder/arms day is tomorrow. Farmer carries at the end are brutal but worth it.
+  </div>
+  <div class="exercise-grid" id="upper-grid"></div>
+</div>
+
+<div id="day-arms" class="day-section">
+  <div class="day-header">
+    <div class="day-icon" style="background:rgba(168,85,247,0.15); color:var(--arms)">🎯</div>
+    <div class="day-header-text">
+      <h2 style="color:var(--arms)">Shoulders + Arms — Saturday</h2>
+      <p>Lateral Delts · Biceps · Triceps · Forearms</p>
+    </div>
+  </div>
+  <div class="day-tip" style="background:rgba(168,85,247,0.08); border-color:var(--arms); color:rgba(255,255,255,0.75)">
+    <strong style="color:var(--arms)">Pro tip:</strong> Lateral raises go FIRST while you're fresh. This whole day exists to build width. The reverse curls at the end directly help your mouse control.
+  </div>
+  <div class="exercise-grid" id="arms-grid"></div>
+</div>
+
+<div id="day-rest2" class="day-section">
+  <div class="rest-section">
+    <span class="rest-emoji">🏖️</span>
+    <h2>Rest Day — Sunday</h2>
+    <p>Full week done. Recover completely — you've earned it. Same rules: protein, sleep, hydration.</p>
+    <div class="rest-tips">
+      <div class="rest-tip"><div class="rt-icon">🥗</div><div class="rt-label">Eat clean</div><div class="rt-sub">Maintenance or slight surplus. Real food.</div></div>
+      <div class="rest-tip"><div class="rt-icon">📱</div><div class="rt-label">Game freely</div><div class="rt-sub">Don't train forearms today — DOMS kills aim.</div></div>
+      <div class="rest-tip"><div class="rt-icon">📋</div><div class="rt-label">Plan Monday</div><div class="rt-sub">Know your weights before you walk in.</div></div>
+      <div class="rest-tip"><div class="rt-icon">😴</div><div class="rt-label">Sleep early</div><div class="rt-sub">7 AM gym tomorrow. Don't wreck yourself.</div></div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// Exercise images: Using wger open exercise DB (reliable, free, no auth)
+// Format: https://wger.de/api/v2/exercise/[id]/images/ — but we'll use direct working image URLs
+// Using a mix of reliable CDN sources + emoji fallbacks
+
+const exercises = {
+  push: [
+    { name: "Incline Barbell Bench Press", muscle: "Upper chest · Front delts", sets: "4 × 6-8",
+      img: "https://wger.de/static/images/exercises/main/shoulder-press.jpg",
+      imgSearch: "incline+barbell+bench+press",
+      how: "<strong>Setup:</strong> Bench at 30-45°, grip slightly wider than shoulder-width. <strong>Down:</strong> Lower bar to upper chest, elbows at ~45°. <strong>Up:</strong> Drive bar up and slightly back. Don't bounce off chest." },
+    { name: "Flat Dumbbell Press", muscle: "Chest · Triceps · Front delts", sets: "4 × 8-10",
+      img: "",
+      imgSearch: "dumbbell+bench+press",
+      how: "<strong>Setup:</strong> Flat bench, DBs at chest level. <strong>Down:</strong> Lower until elbows just below bench. <strong>Up:</strong> Press up and slightly in, don't lock out. Full stretch at bottom." },
+    { name: "Cable Flye", muscle: "Chest — inner squeeze", sets: "3 × 12-15",
+      img: "", imgSearch: "cable+fly+chest",
+      how: "<strong>Setup:</strong> Cables at shoulder height, slight forward lean. Bring hands together in a wide arc. <strong>Squeeze</strong> hard at midpoint. Slight bend in elbows throughout." },
+    { name: "Overhead Barbell Press", muscle: "Shoulders · Triceps · Upper traps", sets: "4 × 6-8",
+      img: "", imgSearch: "overhead+barbell+press",
+      how: "<strong>Brace</strong> core and glutes. <strong>Press</strong> straight up, bar passes nose, push head through at top. Don't hyperextend lower back." },
+    { name: "Lateral Raises", muscle: "Lateral deltoids — WIDTH builder", sets: "5 × 12-15",
+      img: "", imgSearch: "dumbbell+lateral+raise",
+      how: "<strong>Lead with elbow</strong>, not your hand. Slight forward lean at hips. Raise until arms parallel to floor — no higher. <strong>2 seconds down</strong> always. Pinky slightly higher than thumb." },
+    { name: "Front Raise", muscle: "Front deltoids", sets: "3 × 12",
+      img: "", imgSearch: "dumbbell+front+raise",
+      how: "Stand tall, DBs at thighs. <strong>Raise</strong> to shoulder height — no higher. Slight bend in elbow. <strong>Control</strong> the lowering phase. No torso swing." },
+    { name: "Tricep Pushdown", muscle: "Triceps — all three heads", sets: "4 × 12",
+      img: "", imgSearch: "tricep+pushdown+cable",
+      how: "Rope or bar at high cable. <strong>Elbows pinned to sides — they don't move.</strong> Push down to full extension. Squeeze triceps at bottom. Slow back up." },
+    { name: "Overhead Tricep Extension", muscle: "Triceps long head — size builder", sets: "3 × 12",
+      img: "", imgSearch: "overhead+tricep+extension",
+      how: "Hold DB overhead with both hands, or cable from low pulley. <strong>Lower</strong> behind head by bending elbows. <strong>Extend</strong> back up fully. Only forearms move." },
+    { name: "Dips", muscle: "Lower chest · Triceps", sets: "3 × failure",
+      img: "", imgSearch: "chest+dips+exercise",
+      how: "<strong>Chest focus:</strong> Lean slightly forward, let elbows flare. <strong>Down:</strong> Until upper arms parallel to floor. <strong>Up:</strong> Press back up without fully locking out. Add weight when bodyweight is easy." }
+  ],
+  pull: [
+    { name: "Barbell Deadlift", muscle: "Full posterior chain", sets: "4 × 5",
+      img: "", imgSearch: "barbell+deadlift",
+      how: "<strong>Setup:</strong> Bar over mid-foot, hip-width stance. Hinge at hips, grip just outside legs. <strong>Brace</strong> hard. <strong>Drive</strong> floor away, bar stays close to body. Lock hips at top." },
+    { name: "Barbell Row", muscle: "Mid-back · Lats · Rear delts", sets: "4 × 6-8",
+      img: "", imgSearch: "barbell+bent+over+row",
+      how: "Hinge to ~45° torso angle, overhand grip. <strong>Pull</strong> bar to lower chest/upper abs. <strong>Squeeze</strong> shoulder blades together at top. Lower with control." },
+    { name: "Pull-ups", muscle: "Lats · Biceps · Rear delts", sets: "4 × failure",
+      img: "", imgSearch: "pull+ups+exercise",
+      how: "<strong>Full ROM:</strong> Start from dead hang. Pull chest to bar, lead with elbows going to hips. <strong>Lower</strong> all the way down. Add weight when >12 reps." },
+    { name: "Lat Pulldown", muscle: "Lats · Teres major", sets: "3 × 10-12",
+      img: "", imgSearch: "lat+pulldown+wide+grip",
+      how: "Wide grip, slight backward lean. <strong>Pull</strong> bar to upper chest, drive elbows down and back. <strong>Control</strong> the weight on the way up, full stretch at top." },
+    { name: "Seated Cable Row", muscle: "Mid-back · Lats · Biceps", sets: "3 × 10-12",
+      img: "", imgSearch: "seated+cable+row",
+      how: "Sit tall, grab V-bar. <strong>Pull</strong> to lower abs, drive elbows back. <strong>Pause and squeeze</strong> at full contraction. Return slowly." },
+    { name: "Face Pulls", muscle: "Rear delts · External rotators", sets: "4 × 15",
+      img: "", imgSearch: "face+pull+cable+exercise",
+      how: "Rope at head height. Pull to face, separating ends at ears. <strong>Key:</strong> Externally rotate at top — hands beside ears, not in front." },
+    { name: "Barbell Curl", muscle: "Biceps — peak and mass", sets: "4 × 8-10",
+      img: "", imgSearch: "barbell+curl+bicep",
+      how: "Shoulder-width grip, elbows at sides. <strong>Curl</strong> up — don't let elbows drift. <strong>Squeeze</strong> at top, lower slowly. No swinging." },
+    { name: "Hammer Curl", muscle: "Brachialis · Brachioradialis", sets: "3 × 12",
+      img: "", imgSearch: "hammer+curl+dumbbell",
+      how: "<strong>Neutral grip</strong> (thumbs up). Curl up, keep wrists neutral. Hits the brachialis which sits under the bicep — makes arms look thicker." },
+    { name: "Reverse Curl", muscle: "Forearms · Brachioradialis", sets: "3 × 12",
+      img: "", imgSearch: "reverse+barbell+curl",
+      how: "<strong>Overhand grip</strong> (knuckles up). Curl up while keeping that grip. Slower and harder than regular curls. Great for gaming endurance." }
+  ],
+  legs: [
+    { name: "Barbell Squat", muscle: "Quads · Glutes · Hamstrings", sets: "4 × 6-8",
+      img: "", imgSearch: "barbell+back+squat",
+      how: "<strong>Setup:</strong> Bar on traps, feet shoulder-width. <strong>Brace</strong> hard. <strong>Squat</strong> until thighs parallel. Drive knees out. Push floor away to stand." },
+    { name: "Leg Press", muscle: "Quads · Glutes", sets: "4 × 10-12",
+      img: "", imgSearch: "leg+press+machine",
+      how: "<strong>Lower</strong> until knees near chest — full ROM. <strong>Press</strong> back without locking out. Don't let lower back peel off the pad." },
+    { name: "Romanian Deadlift", muscle: "Hamstrings · Glutes", sets: "4 × 8-10",
+      img: "", imgSearch: "romanian+deadlift",
+      how: "Stand tall. <strong>Hinge</strong> at hips, push hips back — bar slides down thighs. <strong>Feel</strong> the stretch, drive hips forward to rise." },
+    { name: "Leg Curl", muscle: "Hamstrings", sets: "3 × 12",
+      img: "", imgSearch: "seated+leg+curl+machine",
+      how: "<strong>Curl</strong> heels toward butt — full range. <strong>Squeeze</strong> at peak. <strong>Slow</strong> on the way down. Dorsiflexing feet makes it harder." },
+    { name: "Leg Extension", muscle: "Quads — isolation", sets: "3 × 12",
+      img: "", imgSearch: "leg+extension+machine",
+      how: "Sit tall. <strong>Extend</strong> fully — lock out at top and squeeze quads. <strong>Lower</strong> slowly. Focus on feeling the quad burn." },
+    { name: "Walking Lunges", muscle: "Quads · Glutes · Balance", sets: "3 × 12 each",
+      img: "", imgSearch: "dumbbell+walking+lunges",
+      how: "<strong>Step</strong> forward, lower back knee close to floor. <strong>Push</strong> off front foot to step into next rep. Longer steps = glutes. Shorter = quads." },
+    { name: "Standing Calf Raises", muscle: "Gastrocnemius · Soleus", sets: "5 × 15-20",
+      img: "", imgSearch: "standing+calf+raises",
+      how: "<strong>Full ROM:</strong> Deep stretch at bottom, pause, rise as high as possible. 2s up, 2s down, 1s pause at top." },
+    { name: "Dead Hang", muscle: "Grip strength · Shoulder decompression", sets: "3 × failure",
+      img: "", imgSearch: "dead+hang+bar",
+      how: "Grab bar, let body hang. Shoulders relaxed into ears. <strong>Hold</strong> as long as possible. Decompresses spine, builds grip endurance." }
+  ],
+  upper: [
+    { name: "Flat Barbell Bench Press", muscle: "Chest · Triceps · Front delts", sets: "4 × 6-8",
+      img: "", imgSearch: "barbell+bench+press",
+      how: "<strong>Setup:</strong> Flat bench, grip outside shoulder-width. <strong>Lower</strong> to mid-chest. <strong>Drive</strong> bar up explosively. Feet flat, back slightly arched." },
+    { name: "Weighted Pull-ups", muscle: "Lats · Biceps", sets: "4 × 6-8",
+      img: "", imgSearch: "weighted+pull+ups",
+      how: "<strong>Add weight</strong> via dip belt. Dead hang start, pull chest to bar. If no weight, do controlled slow bodyweight reps." },
+    { name: "Dumbbell Shoulder Press", muscle: "Shoulders · Triceps", sets: "4 × 8-10",
+      img: "", imgSearch: "dumbbell+shoulder+press+seated",
+      how: "<strong>Seated</strong> for stability. DBs at ear level. <strong>Press</strong> up and slightly in. Don't lock out fully. <strong>Lower</strong> back to ear level with control." },
+    { name: "T-Bar Row", muscle: "Mid/lower back thickness", sets: "4 × 8-10",
+      img: "", imgSearch: "t+bar+row+exercise",
+      how: "Hinge at hips, back flat. <strong>Pull</strong> handle to lower chest, drive elbows back. <strong>Squeeze</strong> shoulder blades together at top." },
+    { name: "Incline Dumbbell Press", muscle: "Upper chest", sets: "3 × 10",
+      img: "", imgSearch: "incline+dumbbell+press",
+      how: "<strong>Bench at 30-45°.</strong> Press DBs up and slightly together — don't fully lock out. <strong>Lower</strong> to full stretch. Feel upper chest working." },
+    { name: "Lateral Raises", muscle: "Lateral delts", sets: "4 × 12-15",
+      img: "", imgSearch: "dumbbell+lateral+raise",
+      how: "<strong>Third time this week.</strong> Lead with elbow, slight forward lean, 2 seconds down. Go slightly lighter if fatigued — quality over weight." },
+    { name: "Face Pulls", muscle: "Rear delts · Rotator cuff", sets: "3 × 15",
+      img: "", imgSearch: "face+pull+cable+exercise",
+      how: "Rope at head height. Pull to face, separate rope ends at ears with external rotation. Essential for pressing balance." },
+    { name: "Farmer Carries", muscle: "Traps · Grip · Core", sets: "3 × 40m",
+      img: "", imgSearch: "farmer+carry+dumbbell",
+      how: "Pick up heavy DBs. Walk tall — no leaning. <strong>Shoulders packed</strong> back and down. Brace core. Best for trap development." }
+  ],
+  arms: [
+    { name: "Lateral Raises — Heavy", muscle: "Lateral delts — WIDTH", sets: "5 × 12-15",
+      img: "", imgSearch: "dumbbell+lateral+raise",
+      how: "<strong>Do FIRST, fresh.</strong> Go slightly heavier than usual. Lead with elbow, slight forward lean. 2 full seconds on descent every rep." },
+    { name: "Seated DB Shoulder Press", muscle: "All 3 deltoid heads", sets: "4 × 8-10",
+      img: "", imgSearch: "seated+dumbbell+shoulder+press",
+      how: "<strong>Seated</strong> strict form. Press up and slightly in. Full ROM — don't cut range short. <strong>Lower</strong> to ears each rep." },
+    { name: "Cable Lateral Raise", muscle: "Lateral delts", sets: "3 × 15",
+      img: "", imgSearch: "cable+lateral+raise",
+      how: "Cable at low pulley, grab with far hand. Raise to shoulder height. Constant tension makes this superior for the stretched position." },
+    { name: "Upright Row", muscle: "Lateral delts · Traps", sets: "3 × 12",
+      img: "", imgSearch: "barbell+upright+row",
+      how: "Slightly narrower than shoulder-width grip. <strong>Pull</strong> bar to chin — elbows drive up and out. Use cable if barbell hurts wrists." },
+    { name: "Barbell Curl", muscle: "Biceps peak and mass", sets: "4 × 8-10",
+      img: "", imgSearch: "barbell+curl+bicep",
+      how: "<strong>Strict form.</strong> Elbows pinned at sides. Curl up, squeeze hard, lower slowly. Arms are warmed up — go heavier than usual." },
+    { name: "Incline Dumbbell Curl", muscle: "Biceps long head", sets: "3 × 12",
+      img: "", imgSearch: "incline+dumbbell+curl",
+      how: "<strong>Bench 45-60°,</strong> arms hang straight down. <strong>Curl up.</strong> The bottom stretch is the whole point. Go lighter — the stretch makes it harder." },
+    { name: "Tricep Pushdown", muscle: "Triceps — all heads", sets: "4 × 12",
+      img: "", imgSearch: "tricep+pushdown+cable",
+      how: "Rope or bar, high pulley. Elbows pinned — they don't move. <strong>Push</strong> to full extension. Separate rope ends at bottom." },
+    { name: "Skull Crushers", muscle: "Triceps long head", sets: "3 × 10",
+      img: "", imgSearch: "skull+crushers+ez+bar",
+      how: "Flat bench. Lower weight to forehead by bending elbows. <strong>Upper arms vertical</strong> — don't move them. Extend back up." },
+    { name: "Reverse Curl", muscle: "Forearms — gaming health", sets: "2 × 15",
+      img: "", imgSearch: "reverse+barbell+curl",
+      how: "<strong>Overhand grip.</strong> Slow, controlled. Prevents wrist fatigue. Don't do this the day before a long gaming session — DOMS ruins aim." }
+  ]
+};
+
+// Reliable exercise image sources via ExerciseDB (RapidAPI free tier) or fallback to SVG icons
+// Using Unsplash fitness photos as reliable fallback images
+const exerciseImages = {
+  "Incline Barbell Bench Press": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop",
+  "Flat Dumbbell Press": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop",
+  "Cable Flye": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&h=250&fit=crop",
+  "Overhead Barbell Press": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=250&fit=crop",
+  "Lateral Raises": "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&h=250&fit=crop",
+  "Lateral Raises — Heavy": "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&h=250&fit=crop",
+  "Front Raise": "https://images.unsplash.com/photo-1583454155184-870a1f63aebc?w=400&h=250&fit=crop",
+  "Tricep Pushdown": "https://images.unsplash.com/photo-1530822847156-5df684ec5933?w=400&h=250&fit=crop",
+  "Overhead Tricep Extension": "https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=400&h=250&fit=crop",
+  "Dips": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop",
+  "Barbell Deadlift": "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?w=400&h=250&fit=crop",
+  "Barbell Row": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop",
+  "Pull-ups": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400&h=250&fit=crop",
+  "Weighted Pull-ups": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400&h=250&fit=crop",
+  "Lat Pulldown": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=250&fit=crop",
+  "Seated Cable Row": "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?w=400&h=250&fit=crop",
+  "Face Pulls": "https://images.unsplash.com/photo-1583454155184-870a1f63aebc?w=400&h=250&fit=crop",
+  "Barbell Curl": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=250&fit=crop",
+  "Hammer Curl": "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&h=250&fit=crop",
+  "Reverse Curl": "https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=400&h=250&fit=crop",
+  "Barbell Squat": "https://images.unsplash.com/photo-1566241142559-40e1dab266c6?w=400&h=250&fit=crop",
+  "Leg Press": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop",
+  "Romanian Deadlift": "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?w=400&h=250&fit=crop",
+  "Leg Curl": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop",
+  "Leg Extension": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=250&fit=crop",
+  "Walking Lunges": "https://images.unsplash.com/photo-1539794830467-1f1755804d13?w=400&h=250&fit=crop",
+  "Standing Calf Raises": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400&h=250&fit=crop",
+  "Dead Hang": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop",
+  "Flat Barbell Bench Press": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop",
+  "Dumbbell Shoulder Press": "https://images.unsplash.com/photo-1583454155184-870a1f63aebc?w=400&h=250&fit=crop",
+  "Seated DB Shoulder Press": "https://images.unsplash.com/photo-1583454155184-870a1f63aebc?w=400&h=250&fit=crop",
+  "T-Bar Row": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop",
+  "Incline Dumbbell Press": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop",
+  "Farmer Carries": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&h=250&fit=crop",
+  "Cable Lateral Raise": "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&h=250&fit=crop",
+  "Upright Row": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=250&fit=crop",
+  "Incline Dumbbell Curl": "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&h=250&fit=crop",
+  "Skull Crushers": "https://images.unsplash.com/photo-1530822847156-5df684ec5933?w=400&h=250&fit=crop"
+};
+
+function buildGrid(day, containerId) {
+  const container = document.getElementById(containerId);
+  const exList = exercises[day];
+  if (!exList) return;
+
+  exList.forEach((ex, i) => {
+    const card = document.createElement('div');
+    card.className = 'ex-card';
+    card.style.animation = `fadeUp 0.5s ${0.05 + (i * 0.06)}s cubic-bezier(0.16, 1, 0.3, 1) forwards`;
+
+    const imgSrc = exerciseImages[ex.name] || '';
+
+    card.innerHTML = `
+      <div class="ex-img-wrap">
+        <img src="${imgSrc}" alt="${ex.name}"
+          onload="this.style.opacity='1';"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="ex-img-fallback" style="display:none">
+          <div class="fallback-icon">🏋️</div>
+          <div class="fallback-text">${ex.name}</div>
+        </div>
+        <div class="ex-num-badge">${i + 1}</div>
+      </div>
+      <div class="ex-body">
+        <div class="ex-top-row">
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-sets-badge">${ex.sets}</div>
+        </div>
+        <div class="ex-muscle">${ex.muscle}</div>
+        <div class="ex-expand-hint">Tap to see how →</div>
+        <div class="ex-how">${ex.how}</div>
+      </div>
+    `;
+
+    // Mobile tap to expand
+    card.addEventListener('click', () => {
+      const isMobile = window.innerWidth < 640;
+      if (!isMobile) return;
+      card.classList.toggle('expanded');
+    });
+
+    container.appendChild(card);
+  });
+}
+
+buildGrid('push', 'push-grid');
+buildGrid('pull', 'pull-grid');
+buildGrid('legs', 'legs-grid');
+buildGrid('upper', 'upper-grid');
+buildGrid('arms', 'arms-grid');
+
+function showDay(day, btn) {
+  document.querySelectorAll('.day-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('day-' + day).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
