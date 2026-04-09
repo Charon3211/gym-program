@@ -22,24 +22,20 @@
             --ash: #111;
             --bone: #ddd;
             --steel: #222;
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
         }
         
-        html {
+        html, body {
+            height: 100%;
             height: -webkit-fill-available;
-        }
-        
-        body {
             background: var(--void);
             color: var(--bone);
             font-family: 'Roboto Condensed', sans-serif;
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
             overflow-x: hidden;
+        }
+        
+        body {
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            position: relative;
         }
         
         /* CRT Scanline Effect */
@@ -67,32 +63,45 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 10px;
-            padding-top: calc(10px + var(--safe-top));
-            padding-bottom: calc(20px + var(--safe-bottom));
+            padding-top: max(10px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
         }
         
-        /* Header - iPhone Safe Area */
+        /* Header */
         header {
             border-bottom: 3px solid var(--blood);
-            padding: 15px 0;
+            padding: 10px 0 15px 0;
             margin-bottom: 15px;
             position: relative;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+        }
+        
+        .title-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
         
         h1 {
             font-family: 'Anton', sans-serif;
-            font-size: 2.2rem;
+            font-size: 2rem;
             text-transform: uppercase;
             letter-spacing: -1px;
             color: var(--bone);
             text-shadow: 3px 3px 0 var(--blood);
             transform: skew(-3deg);
             line-height: 1;
-            animation: glitch 4s infinite;
-            padding-top: var(--safe-top);
+        }
+        
+        .datetime {
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--blood);
+            font-weight: 700;
+            text-transform: uppercase;
+            line-height: 1.4;
         }
         
         @keyframes glitch {
@@ -112,7 +121,7 @@
         .month-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex: 1;
         }
         
@@ -121,15 +130,15 @@
             border: none;
             color: var(--void);
             font-family: 'Anton', sans-serif;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             width: 44px;
             height: 44px;
             cursor: pointer;
             clip-path: polygon(20% 0%, 100% 0, 100% 80%, 80% 100%, 0 100%, 0% 20%);
-            transition: transform 0.15s;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
         
         .month-btn:active {
@@ -139,39 +148,40 @@
         
         .current-month {
             font-family: 'Anton', sans-serif;
-            font-size: 1rem;
+            font-size: 0.95rem;
             text-transform: uppercase;
             text-align: center;
             border: 2px solid var(--steel);
-            padding: 10px 5px;
+            padding: 10px 4px;
             background: var(--ash);
             flex: 1;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         
         .program-select {
             background: var(--ash);
             color: var(--bone);
             border: 2px solid var(--blood);
-            padding: 10px;
+            padding: 0 8px;
             font-family: 'Roboto Condensed', sans-serif;
             font-weight: 700;
             text-transform: uppercase;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             cursor: pointer;
-            min-width: 110px;
-            border-radius: 0;
+            width: 100px;
             height: 44px;
+            border-radius: 0;
+            flex-shrink: 0;
         }
         
         /* Rage Banner */
         .rage-banner {
             background: var(--blood);
             color: var(--void);
-            padding: 15px;
+            padding: 12px;
             text-align: center;
             font-family: 'Anton', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             margin-bottom: 15px;
             cursor: pointer;
@@ -198,7 +208,7 @@
             40%, 60% { transform: translate3d(4px, 0, 0); }
         }
         
-        /* Calendar Grid - Fixed for iPhone */
+        /* Calendar Grid */
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -206,6 +216,7 @@
             background: var(--steel);
             border: 2px solid var(--steel);
             width: 100%;
+            margin-bottom: 20px;
         }
         
         .day-header {
@@ -223,8 +234,8 @@
         .calendar-day {
             background: var(--ash);
             aspect-ratio: 1;
-            min-height: 50px;
-            padding: 6px 4px;
+            min-height: 48px;
+            padding: 5px 3px;
             position: relative;
             cursor: pointer;
             transition: transform 0.2s, background 0.2s;
@@ -260,7 +271,7 @@
         
         .day-number {
             font-family: 'Anton', sans-serif;
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--bone);
             line-height: 1;
         }
@@ -273,7 +284,7 @@
         }
         
         .muscle-tag {
-            font-size: 0.55rem;
+            font-size: 0.5rem;
             font-weight: 900;
             text-transform: uppercase;
             background: var(--blood);
@@ -289,8 +300,8 @@
         
         .completed-indicator {
             position: absolute;
-            bottom: 4px;
-            right: 4px;
+            bottom: 3px;
+            right: 3px;
             width: 6px;
             height: 6px;
             background: #0f0;
@@ -311,7 +322,7 @@
             cursor: default;
         }
         
-        /* Workout Panel - iOS Optimized */
+        /* Workout Panel - iOS OPTIMIZED LAYOUT */
         .workout-panel {
             position: fixed;
             top: 0;
@@ -320,33 +331,31 @@
             bottom: 0;
             background: var(--void);
             z-index: 1000;
-            padding: calc(20px + var(--safe-top)) 20px calc(20px + var(--safe-bottom));
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
             display: flex;
             flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
         
         .workout-panel.show {
             transform: translateY(0);
         }
         
+        /* Fixed Header */
         .panel-header {
+            background: var(--void);
+            border-bottom: 3px solid var(--blood);
+            padding: max(15px, env(safe-area-inset-top)) 15px 15px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 3px solid var(--blood);
-            padding-bottom: 15px;
             flex-shrink: 0;
+            z-index: 10;
         }
         
         .panel-title {
             font-family: 'Anton', sans-serif;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             text-transform: uppercase;
             color: var(--blood);
             line-height: 1.1;
@@ -359,8 +368,8 @@
             border: none;
             color: var(--void);
             font-family: 'Anton', sans-serif;
-            font-size: 1rem;
-            padding: 12px 20px;
+            font-size: 0.9rem;
+            padding: 10px 18px;
             cursor: pointer;
             clip-path: polygon(20% 0%, 100% 0, 100% 80%, 80% 100%, 0 100%, 0% 20%);
             flex-shrink: 0;
@@ -370,23 +379,28 @@
             background: #f00;
         }
         
+        /* Scrollable Exercise Area */
+        .exercise-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 15px;
+            padding-bottom: 20px;
+        }
+        
         .exercise-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            margin-bottom: 20px;
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
         }
         
         .exercise-item {
             background: var(--ash);
             border-left: 4px solid var(--blood);
-            padding: 15px;
+            padding: 14px;
             display: grid;
             grid-template-columns: 1fr auto;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
             transform: translateX(-20px);
             opacity: 0;
@@ -404,8 +418,9 @@
         .ex-info {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
             overflow: hidden;
+            min-width: 0;
         }
         
         .ex-name {
@@ -415,14 +430,16 @@
             color: var(--bone);
             line-height: 1.2;
             word-wrap: break-word;
+            hyphens: auto;
         }
         
         .ex-meta {
             display: flex;
-            gap: 10px;
-            font-size: 0.85rem;
+            gap: 8px;
+            font-size: 0.8rem;
             color: #888;
             font-weight: 700;
+            flex-wrap: wrap;
         }
         
         .ex-meta span {
@@ -457,13 +474,23 @@
             100% { transform: scale(1); }
         }
         
-        /* Fixed Bottom Area */
+        .rest-message {
+            text-align: center;
+            padding: 80px 20px;
+            font-family: 'Anton', sans-serif;
+            font-size: 1.5rem;
+            color: #444;
+            text-transform: uppercase;
+            line-height: 1.4;
+        }
+        
+        /* Fixed Footer - NO OVERLAP */
         .panel-footer {
             background: var(--void);
             border-top: 2px solid var(--steel);
-            padding: 15px 0;
+            padding: 15px;
+            padding-bottom: max(15px, env(safe-area-inset-bottom));
             flex-shrink: 0;
-            margin-top: auto;
         }
         
         .stats-bar {
@@ -478,7 +505,7 @@
         
         .stat-value {
             font-family: 'Anton', sans-serif;
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             color: var(--blood);
             display: block;
             line-height: 1;
@@ -493,17 +520,18 @@
         
         .destroy-btn {
             width: 100%;
-            padding: 18px;
+            padding: 16px;
             background: var(--blood);
             border: none;
             color: var(--void);
             font-family: 'Anton', sans-serif;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             text-transform: uppercase;
             cursor: pointer;
             clip-path: polygon(0 0, 100% 0, 100% 80%, 98% 100%, 0 100%);
             letter-spacing: 1px;
             font-weight: 900;
+            touch-action: manipulation;
         }
         
         .destroy-btn:active {
@@ -511,35 +539,19 @@
             transform: scale(0.98);
         }
         
-        .rest-message {
-            text-align: center;
-            padding: 60px 20px;
-            font-family: 'Anton', sans-serif;
-            font-size: 1.3rem;
-            color: #444;
-            text-transform: uppercase;
-            line-height: 1.4;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        
-        /* Tablet & Desktop */
+        /* Desktop */
         @media (min-width: 768px) {
             .container {
                 padding: 20px;
-                padding-top: calc(20px + var(--safe-top));
+                padding-top: max(20px, env(safe-area-inset-top));
             }
             
             h1 {
                 font-size: 3.5rem;
-                text-shadow: 5px 5px 0 var(--blood);
             }
             
-            .header-controls {
-                flex: 1;
-                justify-content: flex-end;
+            .datetime {
+                font-size: 1rem;
             }
             
             .current-month {
@@ -555,7 +567,7 @@
             
             .program-select {
                 font-size: 0.9rem;
-                min-width: 140px;
+                width: 140px;
                 height: 50px;
             }
             
@@ -590,10 +602,8 @@
                 background: var(--ash);
                 border: 3px solid var(--blood);
                 margin-top: 30px;
-                padding: 30px;
                 display: none;
                 height: auto;
-                overflow: visible;
             }
             
             .workout-panel.show {
@@ -612,12 +622,16 @@
                 }
             }
             
+            .panel-header {
+                padding: 20px;
+            }
+            
             .panel-title {
                 font-size: 2.2rem;
             }
             
-            .exercise-list {
-                margin-bottom: 20px;
+            .exercise-scroll-area {
+                padding: 20px;
                 overflow: visible;
             }
             
@@ -631,9 +645,7 @@
             }
             
             .panel-footer {
-                position: static;
-                border-top: 2px solid var(--steel);
-                padding: 20px 0 0 0;
+                padding: 20px;
             }
             
             .destroy-btn {
@@ -654,7 +666,13 @@
 <body>
     <div class="container">
         <header>
-            <h1>MAMA RISE</h1>
+            <div class="title-section">
+                <h1>MAMA RISE</h1>
+                <div class="datetime" id="bangladeshTime">
+                    DHAKA<br>
+                    LOADING...
+                </div>
+            </div>
             <div class="header-controls">
                 <div class="month-controls">
                     <button class="month-btn" onclick="changeMonth(-1)">◄</button>
@@ -675,13 +693,16 @@
         
         <div class="calendar-grid" id="calendar"></div>
         
+        <!-- iOS Optimized Panel Structure -->
         <div class="workout-panel" id="workoutPanel">
             <div class="panel-header">
                 <div class="panel-title" id="panelTitle">SELECT A DAY</div>
                 <button class="close-panel" onclick="closePanel()">CLOSE</button>
             </div>
             
-            <div class="exercise-list" id="exerciseList"></div>
+            <div class="exercise-scroll-area">
+                <div class="exercise-list" id="exerciseList"></div>
+            </div>
             
             <div class="panel-footer">
                 <div class="stats-bar">
@@ -924,6 +945,27 @@
         let completedExercises = new Set();
         let currentWorkout = null;
 
+        function updateBangladeshTime() {
+            const options = { 
+                timeZone: 'Asia/Dhaka', 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+            };
+            const formatter = new Intl.DateTimeFormat('en-US', options);
+            const parts = formatter.formatToParts(new Date());
+            
+            const day = parts.find(p => p.type === 'weekday').value;
+            const date = parts.find(p => p.type === 'month').value + ' ' + parts.find(p => p.type === 'day').value;
+            const time = parts.find(p => p.type === 'hour').value + ':' + parts.find(p => p.type === 'minute').value + ' ' + parts.find(p => p.type === 'dayPeriod').value;
+            
+            document.getElementById('bangladeshTime').innerHTML = `DHAKA<br>${day.toUpperCase()}<br>${date}<br>${time}`;
+        }
+
         function rotateRage() {
             const banner = document.getElementById('rageBanner');
             const quote = rageQuotes[Math.floor(Math.random() * rageQuotes.length)];
@@ -1109,6 +1151,9 @@
             closePanel();
         }
 
+        // Initialize
+        updateBangladeshTime();
+        setInterval(updateBangladeshTime, 1000);
         rotateRage();
         renderCalendar();
         
