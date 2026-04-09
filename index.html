@@ -1,790 +1,1149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jihan's Gym Log</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --green:       #3a5a40;
-    --green-light: #588157;
-    --green-pale:  #a3b18a;
-    --brown:       #7c5c3b;
-    --brown-light: #b08968;
-    --brown-pale:  #dda15e;
-    --yellow:      #e9c46a;
-    --yellow-pale: #f4e4b0;
-    --white:       #faf7f2;
-    --off-white:   #f0ebe3;
-    --text-dark:   #2a1f14;
-    --text-mid:    #5a4a38;
-
-    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--off-white);
-    color: var(--text-dark);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ── BACKGROUND TEXTURE ── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      radial-gradient(ellipse 80% 60% at 10% 10%, rgba(88,129,87,0.10) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 80% at 90% 90%, rgba(176,137,104,0.12) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 20px 60px;
-  }
-
-  /* ── HEADER ── */
-  header {
-    padding: 48px 0 0;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .header-eyebrow {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--green-light);
-  }
-
-  .header-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.4rem, 6vw, 4rem);
-    font-weight: 900;
-    line-height: 1.05;
-    color: var(--text-dark);
-  }
-
-  .header-title span {
-    color: var(--brown-light);
-  }
-
-  /* ── LIVE TICKER ── */
-  .ticker {
-    margin-top: 32px;
-    background: var(--green);
-    border-radius: 16px;
-    padding: 24px 28px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 16px;
-    align-items: center;
-    box-shadow: 0 8px 32px rgba(58,90,64,0.18);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .ticker::after {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 160px; height: 160px;
-    background: radial-gradient(circle, rgba(233,196,106,0.15) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-
-  .ticker-left {}
-
-  .ticker-day-name {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.6rem, 4vw, 2.4rem);
-    font-weight: 700;
-    color: var(--yellow);
-    line-height: 1;
-  }
-
-  .ticker-date {
-    font-size: 13px;
-    font-weight: 400;
-    color: rgba(250,247,242,0.65);
-    margin-top: 4px;
-  }
-
-  .ticker-clock {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2rem, 5vw, 3rem);
-    font-weight: 700;
-    color: var(--white);
-    letter-spacing: 0.04em;
-    text-align: right;
-    line-height: 1;
-  }
-
-  .ticker-clock .ampm {
-    font-size: 0.4em;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    color: var(--yellow);
-    vertical-align: super;
-    margin-left: 4px;
-  }
-
-  /* ── QUOTE CARD ── */
-  .quote-card {
-    margin-top: 20px;
-    background: var(--yellow-pale);
-    border-left: 4px solid var(--yellow);
-    border-radius: 12px;
-    padding: 18px 22px;
-    font-size: 14px;
-    font-style: italic;
-    color: var(--text-mid);
-    line-height: 1.6;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 0.5s var(--ease-smooth), transform 0.5s var(--ease-smooth);
-  }
-
-  .quote-card.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .quote-card .quote-author {
-    display: block;
-    font-style: normal;
-    font-weight: 600;
-    font-size: 12px;
-    margin-top: 8px;
-    color: var(--brown);
-    letter-spacing: 0.04em;
-  }
-
-  /* ── DAY NAV ── */
-  .day-nav {
-    margin-top: 36px;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .day-btn {
-    flex: 1 1 calc(14.28% - 8px);
-    min-width: 80px;
-    padding: 10px 8px;
-    border: 2px solid transparent;
-    border-radius: 12px;
-    background: var(--white);
-    color: var(--text-mid);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s var(--ease-smooth);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
-
-  .day-btn .day-short {
-    display: block;
-    font-size: 10px;
-    font-weight: 400;
-    opacity: 0.6;
-    margin-top: 2px;
-  }
-
-  .day-btn:hover {
-    background: var(--green-pale);
-    color: var(--green);
-    border-color: var(--green-pale);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(88,129,87,0.15);
-  }
-
-  .day-btn.active {
-    background: var(--green);
-    color: var(--yellow);
-    border-color: var(--green);
-    box-shadow: 0 8px 24px rgba(58,90,64,0.25);
-    transform: translateY(-2px);
-  }
-
-  .day-btn.today-marker {
-    border-color: var(--yellow);
-  }
-
-  /* ── WORKOUT CARD ── */
-  .workout-card {
-    margin-top: 24px;
-    background: var(--white);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.07);
-    animation: cardIn 0.4s var(--ease-spring) both;
-  }
-
-  @keyframes cardIn {
-    from { opacity: 0; transform: translateY(16px) scale(0.98); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  .card-header {
-    padding: 28px 32px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 1px solid var(--off-white);
-  }
-
-  .card-day-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--green-light);
-  }
-
-  .card-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.4rem, 3vw, 1.9rem);
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-top: 4px;
-  }
-
-  .card-badge {
-    background: var(--yellow);
-    color: var(--text-dark);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 6px 14px;
-    border-radius: 100px;
-    white-space: nowrap;
-    letter-spacing: 0.04em;
-  }
-
-  .card-badge.rest { background: var(--off-white); color: var(--text-mid); }
-
-  /* ── EXERCISE LIST ── */
-  .exercise-list {
-    padding: 8px 32px 32px;
-  }
-
-  .exercise-item {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--off-white);
-    opacity: 0;
-    transform: translateX(-12px);
-    transition: opacity 0.3s var(--ease-smooth), transform 0.3s var(--ease-smooth);
-  }
-
-  .exercise-item.visible {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  .exercise-item:last-child { border-bottom: none; }
-
-  .ex-check {
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
-    border: 2px solid var(--green-pale);
-    background: transparent;
-    cursor: pointer;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s var(--ease-spring);
-    position: relative;
-  }
-
-  .ex-check:hover {
-    border-color: var(--green-light);
-    background: rgba(88,129,87,0.08);
-  }
-
-  .ex-check.checked {
-    background: var(--green);
-    border-color: var(--green);
-  }
-
-  .ex-check.checked::after {
-    content: '';
-    width: 6px;
-    height: 10px;
-    border-right: 2px solid var(--yellow);
-    border-bottom: 2px solid var(--yellow);
-    transform: rotate(45deg) translate(-1px, -1px);
-  }
-
-  .ex-info { flex: 1; }
-
-  .ex-name {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text-dark);
-    transition: color 0.2s;
-  }
-
-  .ex-check.checked ~ .ex-info .ex-name {
-    color: var(--green-pale);
-    text-decoration: line-through;
-    text-decoration-color: var(--green-pale);
-  }
-
-  .ex-sets {
-    font-size: 12px;
-    color: var(--text-mid);
-    margin-top: 2px;
-    font-weight: 400;
-  }
-
-  .ex-tag {
-    font-size: 10px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 100px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .ex-tag.push   { background: rgba(221,161,94,0.18); color: var(--brown-light); }
-  .ex-tag.pull   { background: rgba(88,129,87,0.15);  color: var(--green-light); }
-  .ex-tag.legs   { background: rgba(176,137,104,0.18); color: var(--brown); }
-  .ex-tag.core   { background: rgba(233,196,106,0.25); color: #8a6800; }
-  .ex-tag.rest   { background: var(--off-white); color: var(--text-mid); }
-
-  /* ── PROGRESS BAR ── */
-  .progress-wrap {
-    padding: 0 32px 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .progress-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-mid);
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .progress-track {
-    height: 6px;
-    background: var(--off-white);
-    border-radius: 100px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--green), var(--green-light));
-    border-radius: 100px;
-    transition: width 0.5s var(--ease-smooth);
-    width: 0%;
-  }
-
-  /* ── RESET BTN ── */
-  .reset-btn {
-    display: block;
-    margin: 20px 32px 0;
-    padding: 10px 20px;
-    border: 2px solid var(--off-white);
-    border-radius: 10px;
-    background: transparent;
-    color: var(--text-mid);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s var(--ease-smooth);
-    width: calc(100% - 64px);
-  }
-
-  .reset-btn:hover {
-    background: var(--off-white);
-    color: var(--brown);
-    border-color: var(--brown-pale);
-  }
-
-  /* ── REST / RECOVERY CARD ── */
-  .rest-card-body {
-    padding: 40px 32px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .rest-icon {
-    font-size: 64px;
-    line-height: 1;
-  }
-
-  .rest-msg {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--green);
-  }
-
-  .rest-sub {
-    font-size: 14px;
-    color: var(--text-mid);
-    max-width: 320px;
-    line-height: 1.6;
-  }
-
-  /* ── FOOTER ── */
-  footer {
-    text-align: center;
-    padding: 40px 0 0;
-    font-size: 12px;
-    color: var(--text-mid);
-    opacity: 0.5;
-  }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 600px) {
-    .ticker { grid-template-columns: 1fr; gap: 10px; }
-    .ticker-clock { text-align: left; }
-    .card-header { flex-direction: column; gap: 12px; }
-    .exercise-list, .progress-wrap { padding-left: 20px; padding-right: 20px; }
-    .reset-btn { width: calc(100% - 40px); margin: 20px 20px 0; }
-    .day-btn { min-width: 70px; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#050505">
+    <title>MAMA RISE - CALENDAR OF PAIN</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Roboto+Condensed:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --blood: #8B0000;
+            --dark-blood: #2a0000;
+            --void: #050505;
+            --ash: #111;
+            --bone: #ddd;
+            --steel: #222;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
+        body {
+            background: var(--void);
+            color: var(--bone);
+            font-family: 'Roboto Condensed', sans-serif;
+            position: relative;
+        }
+        
+        /* CRT Scanline Effect - Subtle */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.4;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+            padding-bottom: 100px;
+        }
+        
+        /* Header - Mobile Optimized */
+        header {
+            border-bottom: 3px solid var(--blood);
+            padding: 15px 0;
+            margin-bottom: 15px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        h1 {
+            font-family: 'Anton', sans-serif;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            color: var(--bone);
+            text-shadow: 3px 3px 0 var(--blood);
+            transform: skew(-3deg);
+            line-height: 1;
+            animation: glitch 4s infinite;
+        }
+        
+        @keyframes glitch {
+            0%, 90%, 100% { transform: skew(-3deg) translate(0); text-shadow: 3px 3px 0 var(--blood); }
+            91% { transform: skew(-3deg) translate(-2px, 1px); text-shadow: -2px 2px 0 #ff0000; }
+            92% { transform: skew(-3deg) translate(2px, -1px); text-shadow: 2px -2px 0 #8b0000; }
+            93% { transform: skew(-3deg) translate(0); text-shadow: 3px 3px 0 var(--blood); }
+        }
+        
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .month-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .month-btn {
+            background: var(--blood);
+            border: none;
+            color: var(--void);
+            font-family: 'Anton', sans-serif;
+            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            clip-path: polygon(20% 0%, 100% 0, 100% 80%, 80% 100%, 0 100%, 0% 20%);
+            transition: transform 0.15s;
+            touch-action: manipulation;
+        }
+        
+        .month-btn:active {
+            transform: scale(0.95);
+            background: #600;
+        }
+        
+        .current-month {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            text-align: center;
+            border: 2px solid var(--steel);
+            padding: 8px;
+            background: var(--ash);
+            flex: 1;
+            letter-spacing: 1px;
+        }
+        
+        .program-select {
+            background: var(--ash);
+            color: var(--bone);
+            border: 2px solid var(--blood);
+            padding: 8px;
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            cursor: pointer;
+            min-width: 120px;
+        }
+        
+        /* Rage Banner */
+        .rage-banner {
+            background: var(--blood);
+            color: var(--void);
+            padding: 15px;
+            text-align: center;
+            font-family: 'Anton', sans-serif;
+            font-size: 1rem;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 98% 100%, 0 100%);
+            line-height: 1.3;
+            letter-spacing: 0.5px;
+            transition: filter 0.2s;
+            user-select: none;
+        }
+        
+        .rage-banner:active {
+            filter: brightness(1.2);
+        }
+        
+        .rage-banner.shake {
+            animation: violentShake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        @keyframes violentShake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        
+        /* Calendar Grid - Mobile First */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            background: var(--steel);
+            border: 2px solid var(--steel);
+        }
+        
+        .day-header {
+            background: var(--void);
+            padding: 8px 2px;
+            text-align: center;
+            font-family: 'Anton', sans-serif;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--blood);
+            border-bottom: 2px solid var(--blood);
+        }
+        
+        .calendar-day {
+            background: var(--ash);
+            aspect-ratio: 1;
+            min-height: 60px;
+            padding: 5px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        
+        .calendar-day:active {
+            transform: scale(0.95);
+        }
+        
+        .calendar-day.active {
+            background: var(--dark-blood);
+            border: 2px solid var(--blood);
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+        }
+        
+        .calendar-day.rest-day {
+            background: #0a0a0a;
+            opacity: 0.7;
+        }
+        
+        .calendar-day.rest-day .muscle-tag {
+            background: #333;
+            color: #666;
+            font-size: 0.55rem;
+        }
+        
+        .day-number {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.1rem;
+            color: var(--bone);
+            line-height: 1;
+        }
+        
+        .day-number.today {
+            color: var(--blood);
+            text-shadow: 0 0 10px rgba(139,0,0,0.8);
+            transform: scale(1.1);
+            display: inline-block;
+        }
+        
+        .muscle-tag {
+            font-size: 0.6rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            background: var(--blood);
+            color: var(--void);
+            padding: 2px 4px;
+            display: inline-block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0% 30%);
+        }
+        
+        .completed-indicator {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            width: 8px;
+            height: 8px;
+            background: #0f0;
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px #0f0;
+        }
+        
+        .calendar-day.completed .completed-indicator {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .empty-day {
+            background: #080808;
+            cursor: default;
+        }
+        
+        /* Workout Panel - Mobile Optimized */
+        .workout-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--void);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .workout-panel.show {
+            transform: translateY(0);
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 3px solid var(--blood);
+            padding-bottom: 15px;
+            position: sticky;
+            top: 0;
+            background: var(--void);
+            z-index: 10;
+        }
+        
+        .panel-title {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            color: var(--blood);
+            line-height: 1.1;
+            text-shadow: 2px 2px 0 #000;
+        }
+        
+        .close-panel {
+            background: var(--blood);
+            border: none;
+            color: var(--void);
+            font-family: 'Anton', sans-serif;
+            font-size: 1rem;
+            padding: 10px 20px;
+            cursor: pointer;
+            clip-path: polygon(20% 0%, 100% 0, 100% 80%, 80% 100%, 0 100%, 0% 20%);
+            min-width: 80px;
+        }
+        
+        .close-panel:active {
+            background: #f00;
+        }
+        
+        .exercise-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 80px;
+        }
+        
+        .exercise-item {
+            background: var(--ash);
+            border-left: 4px solid var(--blood);
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+            transform: translateX(-20px);
+            opacity: 0;
+            animation: slideIn 0.3s forwards;
+            border-bottom: 1px solid var(--steel);
+        }
+        
+        @keyframes slideIn {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .ex-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .ex-name {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            color: var(--bone);
+            line-height: 1.2;
+        }
+        
+        .ex-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #888;
+            font-weight: 700;
+        }
+        
+        .ex-meta span {
+            color: var(--blood);
+        }
+        
+        .check-box {
+            width: 35px;
+            height: 35px;
+            border: 3px solid var(--steel);
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .check-box.checked {
+            background: var(--blood);
+            border-color: var(--blood);
+            color: var(--void);
+            animation: checkPop 0.3s;
+        }
+        
+        @keyframes checkPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Fixed Bottom Stats & Button */
+        .panel-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, var(--void) 80%, transparent);
+            padding: 20px;
+            border-top: 2px solid var(--steel);
+            z-index: 20;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.8rem;
+            color: var(--blood);
+            display: block;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #666;
+            font-weight: 700;
+        }
+        
+        .destroy-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--blood);
+            border: none;
+            color: var(--void);
+            font-family: 'Anton', sans-serif;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            clip-path: polygon(0 0, 100% 0, 100% 80%, 98% 100%, 0 100%);
+            transition: all 0.2s;
+            letter-spacing: 1px;
+        }
+        
+        .destroy-btn:active {
+            background: #f00;
+            transform: scale(0.98);
+        }
+        
+        .rest-message {
+            text-align: center;
+            padding: 50px 20px;
+            font-family: 'Anton', sans-serif;
+            font-size: 1.5rem;
+            color: #444;
+            text-transform: uppercase;
+            line-height: 1.4;
+        }
+        
+        /* Tablet & Desktop */
+        @media (min-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 30px 0;
+            }
+            
+            h1 {
+                font-size: 4rem;
+                text-shadow: 5px 5px 0 var(--blood);
+            }
+            
+            .header-controls {
+                flex: 1;
+                justify-content: flex-end;
+            }
+            
+            .month-controls {
+                max-width: 400px;
+            }
+            
+            .current-month {
+                font-size: 1.5rem;
+                padding: 10px 30px;
+            }
+            
+            .month-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            .rage-banner {
+                font-size: 1.5rem;
+                padding: 20px;
+                margin-bottom: 30px;
+            }
+            
+            .day-header {
+                font-size: 1rem;
+                padding: 12px;
+            }
+            
+            .calendar-day {
+                min-height: 100px;
+                padding: 10px;
+            }
+            
+            .day-number {
+                font-size: 1.5rem;
+            }
+            
+            .muscle-tag {
+                font-size: 0.75rem;
+                padding: 3px 6px;
+            }
+            
+            .workout-panel {
+                position: static;
+                transform: none;
+                background: var(--ash);
+                border: 3px solid var(--blood);
+                margin-top: 30px;
+                padding: 30px;
+                display: none;
+                height: auto;
+                border-radius: 0;
+            }
+            
+            .workout-panel.show {
+                display: block;
+                animation: slideUp 0.4s ease-out;
+            }
+            
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .panel-header {
+                position: static;
+                background: transparent;
+            }
+            
+            .panel-title {
+                font-size: 2.5rem;
+            }
+            
+            .exercise-list {
+                margin-bottom: 20px;
+            }
+            
+            .exercise-item {
+                grid-template-columns: 2fr 1fr 1fr auto;
+                padding: 20px;
+            }
+            
+            .ex-info {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+            
+            .ex-name {
+                font-size: 1.3rem;
+            }
+            
+            .panel-footer {
+                position: static;
+                background: transparent;
+                border-top: 2px solid var(--steel);
+                padding: 20px 0 0 0;
+            }
+            
+            .destroy-btn {
+                font-size: 2rem;
+                padding: 25px;
+            }
+            
+            .stat-value {
+                font-size: 2.5rem;
+            }
+            
+            .stat-label {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-
-  <!-- HEADER -->
-  <header>
-    <span class="header-eyebrow">Weekly Training Log</span>
-    <h1 class="header-title">Jihan's <span>Gym</span><br>Program</h1>
-  </header>
-
-  <!-- TICKER -->
-  <div class="ticker">
-    <div class="ticker-left">
-      <div class="ticker-day-name" id="liveDay">Loading…</div>
-      <div class="ticker-date" id="liveDate"></div>
-    </div>
-    <div class="ticker-clock" id="liveClock"></div>
-  </div>
-
-  <!-- QUOTE -->
-  <div class="quote-card" id="quoteCard">
-    <span id="quoteText"></span>
-    <span class="quote-author" id="quoteAuthor"></span>
-  </div>
-
-  <!-- DAY NAV -->
-  <nav class="day-nav" id="dayNav"></nav>
-
-  <!-- WORKOUT CARD -->
-  <div id="workoutArea"></div>
-
-  <footer>Built for the grind. Stay consistent. 🌿</footer>
-</div>
-
-<script>
-const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-
-const SCHEDULE = {
-  Monday: {
-    label: 'Push Day',
-    tag: 'push',
-    exercises: [
-      { name: 'Bench Press',        sets: '4', reps: '10' },
-      { name: 'Incline Bench',      sets: '3', reps: '10' },
-      { name: 'Skull Crushers',     sets: '3', reps: '10' },
-      { name: 'Dips',               sets: '3', reps: '8'  },
-      { name: 'Chest Cable Fly',    sets: '3', reps: '10' },
-      { name: 'Pike Push Ups',      sets: '3', reps: '10' },
-    ]
-  },
-  Tuesday: {
-    label: 'Pull Day',
-    tag: 'pull',
-    exercises: [
-      { name: 'Deadlifts',             sets: '4', reps: '10' },
-      { name: 'Pull Ups',              sets: '4', reps: '12' },
-      { name: 'Barbell Rows',          sets: '3', reps: '10' },
-      { name: 'Chest Supported Rows',  sets: '3', reps: '10' },
-      { name: 'Lateral Raise',         sets: '4', reps: '10' },
-      { name: 'Preacher Curls',        sets: '3', reps: '10' },
-    ]
-  },
-  Wednesday: {
-    label: 'Leg Day',
-    tag: 'legs',
-    exercises: [
-      { name: 'Squats',             sets: '4', reps: '10' },
-      { name: 'Leg Press',          sets: '3', reps: '10' },
-      { name: 'Quad Extensions',    sets: '3', reps: '10' },
-      { name: 'Leg Curls',          sets: '3', reps: '10' },
-      { name: 'Romanian Deadlifts', sets: '4', reps: '10' },
-      { name: 'Calf Raises',        sets: '4', reps: '15' },
-    ]
-  },
-  Thursday: {
-    label: 'Push Day 2',
-    tag: 'push',
-    exercises: [
-      { name: 'Dumbbell Incline Bench',    sets: '4', reps: '10' },
-      { name: 'Dumbbell Flat Bench',       sets: '3', reps: '10' },
-      { name: 'Chest Cable Fly',           sets: '4', reps: '10' },
-      { name: 'Rear Delt Fly',             sets: '4', reps: '10' },
-      { name: 'Tricep Cable Extensions',   sets: '4', reps: '10' },
-      { name: 'Lateral Raise',             sets: '4', reps: '12' },
-    ]
-  },
-  Friday: {
-    label: 'Pull Day 2',
-    tag: 'pull',
-    exercises: [
-      { name: 'Weighted Chin Ups',  sets: '4', reps: '10' },
-      { name: 'Lat Prayers',        sets: '3', reps: '10' },
-      { name: 'Lat Pull Down',      sets: '4', reps: '8'  },
-      { name: 'Dumbbell Rows',      sets: '4', reps: '10' },
-      { name: 'Preacher Curls',     sets: '4', reps: '10' },
-      { name: 'Hammer Curls',       sets: '4', reps: '10' },
-    ]
-  },
-  Saturday: {
-    label: 'Legs & Abs',
-    tag: 'legs',
-    exercises: [
-      { name: 'Bulgarian Split Squats', sets: '3', reps: '10' },
-      { name: 'Leg Press',              sets: '3', reps: '10' },
-      { name: 'Leg Extensions',         sets: '4', reps: '10' },
-      { name: 'Standing Calf Raise',    sets: '3', reps: '10' },
-      { name: 'Dragon Flags',           sets: '4', reps: '10' },
-      { name: 'Leg Raises',             sets: '3', reps: '10' },
-      { name: 'Cable Crunches',         sets: '4', reps: '10' },
-    ]
-  },
-  Sunday: {
-    label: 'Recovery',
-    tag: 'rest',
-    exercises: [
-      { name: 'Get Your Blood Flowing', sets: '—', reps: '—' },
-      { name: '100 Sit Ups',            sets: '1', reps: '100' },
-    ]
-  },
-};
-
-const QUOTES = {
-  Monday: {
-    text: "The body achieves what the mind believes. Push day — make it count.",
-    author: "Monday Fuel"
-  },
-  Tuesday: {
-    text: "Pull more than weight — pull your character, your discipline, your best self.",
-    author: "Tuesday Grind"
-  },
-  Wednesday: {
-    text: "Leg day is the great equalizer. Everyone skips it. Don't be everyone.",
-    author: "Wednesday Warrior"
-  },
-  Thursday: {
-    text: "Second push, double the intent. Your chest won't build itself.",
-    author: "Thursday Drive"
-  },
-  Friday: {
-    text: "Back and bis. End the week strong — your future self is watching.",
-    author: "Friday Fire"
-  },
-  Saturday: {
-    text: "Legs carry you everywhere. Build them like the foundation they are.",
-    author: "Saturday Strength"
-  },
-  Sunday: {
-    text: "Rest is not laziness — it's strategy. Recover hard, come back harder.",
-    author: "Sunday Reset"
-  },
-};
-
-// ── STORAGE KEY ──
-const storageKey = day => `gymlog_${day}_${new Date().toISOString().slice(0,10)}`;
-
-// ── CLOCK ──
-function updateClock() {
-  const now = new Date();
-  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  const hh = String(h % 12 || 12).padStart(2,'0');
-  const mm = String(m).padStart(2,'0');
-  const ss = String(s).padStart(2,'0');
-  document.getElementById('liveClock').innerHTML = `${hh}:${mm}:${ss}<span class="ampm">${ampm}</span>`;
-  const dayName = DAYS[now.getDay()];
-  document.getElementById('liveDay').textContent = dayName;
-  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
-  document.getElementById('liveDate').textContent = now.toLocaleDateString('en-US', opts);
-}
-
-// ── RENDER DAY NAV ──
-function renderNav(activeDay) {
-  const nav = document.getElementById('dayNav');
-  const todayName = DAYS[new Date().getDay()];
-  const order = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-  nav.innerHTML = order.map(d => `
-    <button class="day-btn ${d === activeDay ? 'active' : ''} ${d === todayName ? 'today-marker' : ''}"
-            onclick="selectDay('${d}')">
-      ${d.slice(0,3)}
-      <span class="day-short">${SCHEDULE[d].label}</span>
-    </button>
-  `).join('');
-}
-
-// ── RENDER WORKOUT ──
-function renderWorkout(day) {
-  const area = document.getElementById('workoutArea');
-  const data = SCHEDULE[day];
-  const saved = JSON.parse(localStorage.getItem(storageKey(day)) || '{}');
-
-  if (data.tag === 'rest') {
-    area.innerHTML = `
-      <div class="workout-card">
-        <div class="card-header">
-          <div>
-            <div class="card-day-label">${day}</div>
-            <div class="card-title">${data.label}</div>
-          </div>
-          <span class="card-badge rest">Rest</span>
-        </div>
-        <div class="rest-card-body">
-          <div class="rest-icon">🌿</div>
-          <div class="rest-msg">Recovery Day</div>
-          <div class="rest-sub">Light movement, walk, stretch. Let the muscles rebuild. Hydrate, sleep well, come back stronger.</div>
-          <div style="margin-top:12px;padding:16px 24px;background:var(--off-white);border-radius:12px;font-size:13px;color:var(--text-mid);">
-            <strong style="color:var(--text-dark)">100 Sit Ups</strong> — because you can. 💪
-          </div>
-        </div>
-      </div>`;
-    return;
-  }
-
-  const total = data.exercises.length;
-  const checked = data.exercises.filter((_,i) => saved[i]).length;
-  const pct = total > 0 ? Math.round((checked / total) * 100) : 0;
-
-  area.innerHTML = `
-    <div class="workout-card">
-      <div class="card-header">
-        <div>
-          <div class="card-day-label">${day}</div>
-          <div class="card-title">${data.label}</div>
-        </div>
-        <span class="card-badge">${data.label.includes('Leg') ? '🦵 Legs' : data.tag === 'push' ? '💪 Push' : '🏋️ Pull'}</span>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-label">
-          <span>Progress</span>
-          <span id="progressPct">${pct}%</span>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="progressFill" style="width:${pct}%"></div>
-        </div>
-      </div>
-      <ul class="exercise-list" id="exList">
-        ${data.exercises.map((ex, i) => `
-          <li class="exercise-item" id="item-${i}">
-            <div class="ex-check ${saved[i] ? 'checked' : ''}" id="check-${i}" onclick="toggleCheck('${day}', ${i})"></div>
-            <div class="ex-info">
-              <div class="ex-name">${ex.name}</div>
-              <div class="ex-sets">${ex.sets} sets × ${ex.reps} reps</div>
+    <div class="container">
+        <header>
+            <h1>MAMA RISE</h1>
+            <div class="header-controls">
+                <div class="month-controls">
+                    <button class="month-btn" onclick="changeMonth(-1)">◄</button>
+                    <div class="current-month" id="currentMonth">JANUARY 2026</div>
+                    <button class="month-btn" onclick="changeMonth(1)">►</button>
+                </div>
+                <select class="program-select" id="programSelect" onchange="renderCalendar()">
+                    <option value="split1">ARNOLD SPLIT</option>
+                    <option value="split2">UPPER LOWER</option>
+                    <option value="split3">HYBRID HELL</option>
+                </select>
             </div>
-            <span class="ex-tag ${data.tag}">${data.tag}</span>
-          </li>
-        `).join('')}
-      </ul>
-      <button class="reset-btn" onclick="resetDay('${day}')">↺ Reset Progress</button>
-    </div>`;
+        </header>
+        
+        <div class="rage-banner" id="rageBanner" onclick="rotateRage()">
+            CLICK TO RECEIVE PAIN
+        </div>
+        
+        <div class="calendar-grid" id="calendar"></div>
+        
+        <!-- Mobile: Full screen panel, Desktop: Inline panel -->
+        <div class="workout-panel" id="workoutPanel">
+            <div class="panel-header">
+                <div class="panel-title" id="panelTitle">SELECT A DAY</div>
+                <button class="close-panel" onclick="closePanel()">CLOSE</button>
+            </div>
+            
+            <div class="exercise-list" id="exerciseList"></div>
+            
+            <div class="panel-footer">
+                <div class="stats-bar">
+                    <div class="stat">
+                        <span class="stat-value" id="statExercises">0</span>
+                        <span class="stat-label">EXERCISES</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="statSets">0</span>
+                        <span class="stat-label">SETS</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="statCompleted">0</span>
+                        <span class="stat-label">DESTROYED</span>
+                    </div>
+                </div>
+                <button class="destroy-btn" id="destroyBtn" onclick="destroyAll()">DESTROY ALL SETS</button>
+            </div>
+        </div>
+    </div>
 
-  // stagger animation
-  setTimeout(() => {
-    document.querySelectorAll('.exercise-item').forEach((el, i) => {
-      setTimeout(() => el.classList.add('visible'), i * 50);
-    });
-  }, 50);
-}
+    <script>
+        const rageQuotes = [
+            "ARE YOU WEAK?", "AREN'T YOU JEALOUS HE IS BETTER THAN YOU", 
+            "MAMA RISE NO BITCH", "YOU STILL SLEEPING PUSSY",
+            "HE OUT THERE GRINDING WHILE YOU CRY", "WAKE THE FUCK UP SOFT ASS",
+            "JEALOUSY AINT GONNA BUILD YOU", "RISE OR STAY WEAK FOREVER",
+            "MAMA SAID NO BITCH SHIT TODAY", "HE IS BETTER CAUSE HE DIDNT QUIT",
+            "ARE YOU GONNA CRY OR LIFT", "STOP BEING JEALOUS AND WORK",
+            "WEAK ENERGY DETECTED", "MAMA RISE NO EXCUSES",
+            "HE EATS PAIN YOU EAT DREAMS", "WAKE UP BEFORE LIFE LEAVES YOU",
+            "JEALOUSY LOOKS UGLY ON YOU", "YOU AINT BUILT? THEN BUILD IT",
+            "HE BETTER NOW NOT TOMORROW", "STOP CRYING START GRINDING",
+            "ARE YOU SOFT OR STEEL", "JEALOUSY IS FOR LOSERS",
+            "WAKE UP MAKE HIM JEALOUS", "MAMA RISE NO BITCH ENERGY",
+            "HE BETTER CAUSE NO EXCUSES", "YOU WEAK OR A BEAST",
+            "STOP WATCHING HIM WIN", "RISE UP LAZY BITCH",
+            "JEALOUSY BURNS USE IT", "MAMA SAID GET UP NO CRYING",
+            "HE BETTER TODAY NOT TOMORROW", "WEAK ASS STAY SLEEPING",
+            "ARE YOU A BITCH OR BEAST", "STOP BEING JEALOUS",
+            "WAKE UP WORLD MOVES WITHOUT YOU", "MAMA RISE NO BITCHES ALLOWED",
+            "HE GRINDING YOU SCROLLING", "YOU JEALOUS OR GONNA SURPASS HIM",
+            "RISE OR STAY DOWN FOREVER", "ARE YOU WEAK OR JUST LAZY",
+            "MAKE THEM REGRET SLEEPING ON YOU", "HE BETTER THAN YOU FOR NOW",
+            "WAKE UP STOP BEING SOFT", "JEALOUSY IS FOR BROKE DREAMERS",
+            "YOU CRYING OR FINALLY GRINDING", "HE WINNING YOU MAKING EXCUSES",
+            "STAY WEAK OR BECOME LEGEND", "JEALOUSY AINT PAYING BILLS",
+            "RISE UP YOU AINT DONE", "HE BETTER CAUSE HE DIDNT QUIT",
+            "STOP BEING JEALOUS BECOME THREAT", "WEAK ENERGY EXPIRED"
+        ];
 
-// ── TOGGLE CHECK ──
-function toggleCheck(day, idx) {
-  const key = storageKey(day);
-  const saved = JSON.parse(localStorage.getItem(key) || '{}');
-  saved[idx] = !saved[idx];
-  localStorage.setItem(key, JSON.stringify(saved));
+        const programs = {
+            split1: {
+                schedule: {
+                    1: { muscle: "CHEST", exercises: [
+                        {name: "Flat Bench Press", sets: 4, reps: "12,10,8,8"},
+                        {name: "Incline Bench Press", sets: 4, reps: "12,10,8,8"},
+                        {name: "Flat Dumbbell Flyes", sets: 3, reps: "8-12"},
+                        {name: "High Cable Flyes", sets: 3, reps: "8-12"},
+                        {name: "Dumbbell Pullover", sets: 3, reps: "8-12"},
+                        {name: "Bar Dips", sets: 3, reps: "Failure"}
+                    ]},
+                    2: { muscle: "LEGS", exercises: [
+                        {name: "Back Squats", sets: 4, reps: "12,10,8,8"},
+                        {name: "Lunges", sets: 4, reps: "12,10,8,8"},
+                        {name: "Leg Extensions", sets: 3, reps: "8-12"},
+                        {name: "Stiff Leg Deads", sets: 3, reps: "8-12"},
+                        {name: "Leg Curls", sets: 3, reps: "8-12"},
+                        {name: "Calf Raises", sets: 3, reps: "Failure"}
+                    ]},
+                    3: { muscle: "BACK", exercises: [
+                        {name: "Deadlift", sets: 4, reps: "6-8"},
+                        {name: "Bent Over Row", sets: 4, reps: "10-12"},
+                        {name: "T-Bar Row", sets: 4, reps: "10-12"},
+                        {name: "Lat Pulldown", sets: 4, reps: "10-12"},
+                        {name: "Seated Row", sets: 4, reps: "10-12"},
+                        {name: "One-arm DB Row", sets: 3, reps: "10-12"}
+                    ]},
+                    4: { muscle: "ABS", exercises: [
+                        {name: "Hanging Knee Raises", sets: 3, reps: "10-20"},
+                        {name: "Crunches", sets: 3, reps: "10-20"},
+                        {name: "Roman Chair Sit-ups", sets: 3, reps: "20-30"},
+                        {name: "Cable Crunches", sets: 3, reps: "10-12"},
+                        {name: "Broomstick Twists", sets: 3, reps: "10-12"}
+                    ]},
+                    5: { muscle: "SHOULDERS", exercises: [
+                        {name: "Smith Machine Press", sets: 5, reps: "15,12,10,8,6"},
+                        {name: "Behind Neck Press", sets: 3, reps: "12,10,8"},
+                        {name: "Lateral Raises", sets: 4, reps: "15,12,10,8"},
+                        {name: "Arnold Press", sets: 3, reps: "12,10,8"},
+                        {name: "Upright Row", sets: 3, reps: "15,12,10"},
+                        {name: "Cable Facepull", sets: 4, reps: "15,12,10,8"}
+                    ]},
+                    6: { muscle: "ARMS", exercises: [
+                        {name: "Incline DB Curl", sets: 4, reps: "8-10"},
+                        {name: "Alternating Curl", sets: 4, reps: "10"},
+                        {name: "Preacher Curl", sets: 4, reps: "10"},
+                        {name: "Concentration Curl", sets: 4, reps: "8-10"},
+                        {name: "Triceps Pushdown", sets: 4, reps: "8-10"},
+                        {name: "Overhead Extension", sets: 4, reps: "10"},
+                        {name: "Lying French Press", sets: 4, reps: "10"},
+                        {name: "Reverse Triceps", sets: 4, reps: "8-10"}
+                    ]},
+                    0: { muscle: "REST", rest: true }
+                }
+            },
+            split2: {
+                schedule: {
+                    1: { muscle: "CHEST/BACK", exercises: [
+                        {name: "Flat Bench Press", sets: 4, reps: "10,8,6,4"},
+                        {name: "Incline Bench Press", sets: 4, reps: "10,8,6,4"},
+                        {name: "Dumbbell Pullovers", sets: 3, reps: "15"},
+                        {name: "Chin-ups", sets: "AMRAP", reps: "50 Total"},
+                        {name: "Bent-Over Row", sets: 4, reps: "8-12"},
+                        {name: "Deadlift", sets: 4, reps: "6-10"},
+                        {name: "Crunches", sets: 5, reps: "25"}
+                    ]},
+                    2: { muscle: "SHOULDERS/ARMS", exercises: [
+                        {name: "Barbell Clean & Press", sets: 3, reps: "8-10"},
+                        {name: "Dumbbell Lateral Raise", sets: 3, reps: "8-12"},
+                        {name: "Barbell Upright Row", sets: 3, reps: "10,6,4"},
+                        {name: "Push Press", sets: 3, reps: "6,4,2"},
+                        {name: "Standing Barbell Curl", sets: 4, reps: "10-12"},
+                        {name: "Seated Dumbbell Curl", sets: 4, reps: "10-12"},
+                        {name: "Triceps Bench Press", sets: 4, reps: "10-12"},
+                        {name: "Overhead Extension", sets: 4, reps: "10-12"}
+                    ]},
+                    3: { muscle: "LEGS/BACK", exercises: [
+                        {name: "Back Squat", sets: 4, reps: "16,12,10,8"},
+                        {name: "Front Lunge", sets: 3, reps: "10/Leg"},
+                        {name: "Seated Leg Curl", sets: 4, reps: "20,16,12,10"},
+                        {name: "Stiff Leg Deadlift", sets: 3, reps: "Failure"},
+                        {name: "Good Mornings", sets: 3, reps: "Failure"},
+                        {name: "Standing Calf Raise", sets: 5, reps: "15"},
+                        {name: "Crunches", sets: 5, reps: "25"}
+                    ]},
+                    4: { muscle: "CHEST/BACK", exercises: [
+                        {name: "Flat Bench Press", sets: 4, reps: "10,8,6,4"},
+                        {name: "Incline Bench Press", sets: 4, reps: "10,8,6,4"},
+                        {name: "Dumbbell Pullovers", sets: 3, reps: "15"},
+                        {name: "Chin-ups", sets: "AMRAP", reps: "50 Total"},
+                        {name: "Bent-Over Row", sets: 4, reps: "8-12"},
+                        {name: "Deadlift", sets: 4, reps: "6-10"},
+                        {name: "Crunches", sets: 5, reps: "25"}
+                    ]},
+                    5: { muscle: "SHOULDERS/ARMS", exercises: [
+                        {name: "Barbell Clean & Press", sets: 3, reps: "8-10"},
+                        {name: "Dumbbell Lateral Raise", sets: 3, reps: "8-12"},
+                        {name: "Barbell Upright Row", sets: 3, reps: "10,6,4"},
+                        {name: "Push Press", sets: 3, reps: "6,4,2"},
+                        {name: "Standing Barbell Curl", sets: 4, reps: "10-12"},
+                        {name: "Seated Dumbbell Curl", sets: 4, reps: "10-12"},
+                        {name: "Triceps Bench Press", sets: 4, reps: "10-12"},
+                        {name: "Overhead Extension", sets: 4, reps: "10-12"}
+                    ]},
+                    6: { muscle: "LEGS/BACK", exercises: [
+                        {name: "Back Squat", sets: 4, reps: "16,12,10,8"},
+                        {name: "Front Lunge", sets: 3, reps: "10/Leg"},
+                        {name: "Seated Leg Curl", sets: 4, reps: "20,16,12,10"},
+                        {name: "Stiff Leg Deadlift", sets: 3, reps: "Failure"},
+                        {name: "Good Mornings", sets: 3, reps: "Failure"},
+                        {name: "Standing Calf Raise", sets: 5, reps: "15"},
+                        {name: "Crunches", sets: 5, reps: "25"}
+                    ]},
+                    0: { muscle: "REST", rest: true }
+                }
+            },
+            split3: {
+                schedule: {
+                    1: { muscle: "CHEST/BACK/LEGS", exercises: [
+                        {name: "Flat Bench Press", sets: 4, reps: "10,8,6,4"},
+                        {name: "Incline Bench Press", sets: 4, reps: "10,8,6,4"},
+                        {name: "Dumbbell Flyes", sets: 3, reps: "10,8,6"},
+                        {name: "Chin-ups", sets: 4, reps: "10"},
+                        {name: "Bent-Over Row", sets: 4, reps: "8-12"},
+                        {name: "Back Squat", sets: 4, reps: "16,12,10,8"},
+                        {name: "Lunges", sets: 3, reps: "10/Leg"},
+                        {name: "Leg Curl", sets: 4, reps: "20,16,12,10"},
+                        {name: "Calf Raises", sets: 5, reps: "15"}
+                    ]},
+                    2: { muscle: "SHOULDERS/ARMS", exercises: [
+                        {name: "Barbell Clean & Press", sets: 3, reps: "8-10"},
+                        {name: "Dumbbell Lateral Raise", sets: 3, reps: "8-12"},
+                        {name: "Barbell Upright Row", sets: 3, reps: "10,6,4"},
+                        {name: "Push Press", sets: 3, reps: "6,4,2"},
+                        {name: "Stiff Leg Deadlift", sets: 3, reps: "10,6,4"},
+                        {name: "Standing Barbell Curl", sets: 4, reps: "10-12"},
+                        {name: "Triceps Bench Press", sets: 4, reps: "10-12"},
+                        {name: "Wrist Curls", sets: 4, reps: "10-12"}
+                    ]},
+                    3: { muscle: "CHEST/BACK/LEGS", exercises: [
+                        {name: "Flat Bench Press", sets: 4, reps: "10,8,6,4"},
+                        {name: "Incline Bench Press", sets: 4, reps: "10,8,6,4"},
+                        {name: "Dumbbell Flyes", sets: 3, reps: "10,8,6"},
+                        {name: "Chin-ups", sets: 4, reps: "10"},
+                        {name: "Bent-Over Row", sets: 4, reps: "8-12"},
+                        {name: "Back Squat", sets: 4, reps: "16,12,10,8"},
+                        {name: "Lunges", sets: 3, reps: "10/Leg"},
+                        {name: "Leg Curl", sets: 4, reps: "20,16,12,10"},
+                        {name: "Calf Raises", sets: 5, reps: "15"}
+                    ]},
+                    4: { muscle: "SHOULDERS/ARMS", exercises: [
+                        {name: "Barbell Clean & Press", sets: 3, reps: "8-10"},
+                        {name: "Dumbbell Lateral Raise", sets: 3, reps: "8-12"},
+                        {name: "Barbell Upright Row", sets: 3, reps: "10,6,4"},
+                        {name: "Push Press", sets: 3, reps: "6,4,2"},
+                        {name: "Stiff Leg Deadlift", sets: 3, reps: "10,6,4"},
+                        {name: "Standing Barbell Curl", sets: 4, reps: "10-12"},
+                        {name: "Triceps Bench Press", sets: 4, reps: "10-12"},
+                        {name: "Wrist Curls", sets: 4, reps: "10-12"}
+                    ]},
+                    5: { muscle: "CHEST/BACK/LEGS", exercises: [
+                        {name: "Flat Bench Press", sets: 4, reps: "10,8,6,4"},
+                        {name: "Incline Bench Press", sets: 4, reps: "10,8,6,4"},
+                        {name: "Dumbbell Flyes", sets: 3, reps: "10,8,6"},
+                        {name: "Chin-ups", sets: 4, reps: "10"},
+                        {name: "Bent-Over Row", sets: 4, reps: "8-12"},
+                        {name: "Back Squat", sets: 4, reps: "16,12,10,8"},
+                        {name: "Lunges", sets: 3, reps: "10/Leg"},
+                        {name: "Leg Curl", sets: 4, reps: "20,16,12,10"},
+                        {name: "Calf Raises", sets: 5, reps: "15"}
+                    ]},
+                    6: { muscle: "SHOULDERS/ARMS", exercises: [
+                        {name: "Barbell Clean & Press", sets: 3, reps: "8-10"},
+                        {name: "Dumbbell Lateral Raise", sets: 3, reps: "8-12"},
+                        {name: "Barbell Upright Row", sets: 3, reps: "10,6,4"},
+                        {name: "Push Press", sets: 3, reps: "6,4,2"},
+                        {name: "Stiff Leg Deadlift", sets: 3, reps: "10,6,4"},
+                        {name: "Standing Barbell Curl", sets: 4, reps: "10-12"},
+                        {name: "Triceps Bench Press", sets: 4, reps: "10-12"},
+                        {name: "Wrist Curls", sets: 4, reps: "10-12"}
+                    ]},
+                    0: { muscle: "REST", rest: true }
+                }
+            }
+        };
 
-  const check = document.getElementById(`check-${idx}`);
-  check.classList.toggle('checked', !!saved[idx]);
+        let currentDate = new Date();
+        let selectedDate = null;
+        let completedExercises = new Set();
+        let currentWorkout = null;
 
-  const data = SCHEDULE[day];
-  const total = data.exercises.length;
-  const checked = data.exercises.filter((_,i) => saved[i]).length;
-  const pct = Math.round((checked / total) * 100);
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressPct').textContent = pct + '%';
-}
+        function rotateRage() {
+            const banner = document.getElementById('rageBanner');
+            const quote = rageQuotes[Math.floor(Math.random() * rageQuotes.length)];
+            banner.textContent = quote;
+            banner.classList.remove('shake');
+            void banner.offsetWidth;
+            banner.classList.add('shake');
+        }
 
-// ── RESET DAY ──
-function resetDay(day) {
-  localStorage.removeItem(storageKey(day));
-  renderWorkout(day);
-}
+        function getMonthData(year, month) {
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            return { 
+                daysInMonth: lastDay.getDate(), 
+                startDayOfWeek: firstDay.getDay() 
+            };
+        }
 
-// ── SELECT DAY ──
-function selectDay(day) {
-  renderNav(day);
-  renderWorkout(day);
-  renderQuote(day);
-}
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const program = document.getElementById('programSelect').value;
+            
+            const monthNames = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE",
+                "JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+            
+            document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+            
+            const { daysInMonth, startDayOfWeek } = getMonthData(year, month);
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+            
+            const dayHeaders = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'day-header';
+                header.textContent = day;
+                calendar.appendChild(header);
+            });
+            
+            // Empty cells
+            for (let i = 0; i < startDayOfWeek; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'calendar-day empty-day';
+                calendar.appendChild(empty);
+            }
+            
+            const today = new Date();
+            const dateKey = `${year}-${month}-`;
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayOfWeek = date.getDay();
+                const workout = programs[program].schedule[dayOfWeek];
+                const dayEl = document.createElement('div');
+                
+                dayEl.className = 'calendar-day';
+                if (workout.rest) dayEl.classList.add('rest-day');
+                if (completedExercises.has(dateKey + day)) dayEl.classList.add('completed');
+                
+                const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+                
+                dayEl.innerHTML = `
+                    <div class="day-number ${isToday ? 'today' : ''}">${day}</div>
+                    <div class="muscle-tag">${workout.muscle}</div>
+                    <div class="completed-indicator"></div>
+                `;
+                
+                dayEl.onclick = () => selectDay(date, dayEl, day);
+                calendar.appendChild(dayEl);
+            }
+        }
 
-// ── RENDER QUOTE ──
-function renderQuote(day) {
-  const q = QUOTES[day];
-  const card = document.getElementById('quoteCard');
-  card.classList.remove('visible');
-  setTimeout(() => {
-    document.getElementById('quoteText').textContent = `"${q.text}"`;
-    document.getElementById('quoteAuthor').textContent = `— ${q.author}`;
-    card.classList.add('visible');
-  }, 100);
-}
+        function selectDay(date, element, dayNum) {
+            // Remove previous active
+            document.querySelectorAll('.calendar-day').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            selectedDate = date;
+            
+            const program = document.getElementById('programSelect').value;
+            const dayOfWeek = date.getDay();
+            currentWorkout = programs[program].schedule[dayOfWeek];
+            const panel = document.getElementById('workoutPanel');
+            const dayNames = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+            
+            document.getElementById('panelTitle').textContent = `${dayNames[dayOfWeek]} - ${currentWorkout.muscle}`;
+            
+            const list = document.getElementById('exerciseList');
+            list.innerHTML = '';
+            
+            if (currentWorkout.rest) {
+                list.innerHTML = `
+                    <div class="rest-message">
+                        REST DAY<br>
+                        <span style="font-size:0.8em; color:#666;">RECOVER OR REGRET</span>
+                    </div>`;
+                document.getElementById('destroyBtn').style.display = 'none';
+            } else {
+                document.getElementById('destroyBtn').style.display = 'block';
+                currentWorkout.exercises.forEach((ex, idx) => {
+                    const item = document.createElement('div');
+                    item.className = 'exercise-item';
+                    item.style.animationDelay = `${idx * 0.05}s`;
+                    item.innerHTML = `
+                        <div class="ex-info">
+                            <div class="ex-name">${ex.name}</div>
+                            <div class="ex-meta">
+                                <span>${ex.sets}</span> SETS | <span>${ex.reps}</span> REPS
+                            </div>
+                        </div>
+                        <div class="check-box" onclick="toggleExercise(this, '${date.getTime()}-${idx}')"></div>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+            
+            updateStats();
+            
+            // Show panel with animation
+            panel.classList.remove('show');
+            setTimeout(() => panel.classList.add('show'), 10);
+            
+            rotateRage();
+        }
 
-// ── INIT ──
-(function init() {
-  const today = DAYS[new Date().getDay()];
-  updateClock();
-  setInterval(updateClock, 1000);
-  renderNav(today);
-  renderWorkout(today);
-  renderQuote(today);
-})();
-</script>
+        function toggleExercise(box, id) {
+            box.classList.toggle('checked');
+            const isChecked = box.classList.contains('checked');
+            
+            // Haptic feedback if available
+            if (navigator.vibrate) navigator.vibrate(10);
+            
+            if (isChecked) {
+                completedExercises.add(id);
+                // Check if all completed
+                const allBoxes = document.querySelectorAll('.check-box');
+                const allChecked = Array.from(allBoxes).every(b => b.classList.contains('checked'));
+                if (allChecked && selectedDate) {
+                    const day = selectedDate.getDate();
+                    const dateKey = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${day}`;
+                    document.querySelector('.calendar-day.active')?.classList.add('completed');
+                }
+            } else {
+                completedExercises.delete(id);
+            }
+            updateStats();
+        }
+
+        function updateStats() {
+            if (!currentWorkout || currentWorkout.rest) {
+                document.getElementById('statExercises').textContent = '0';
+                document.getElementById('statSets').textContent = '0';
+                document.getElementById('statCompleted').textContent = '0';
+                return;
+            }
+            
+            const totalSets = currentWorkout.exercises.reduce((acc, ex) => acc + (typeof ex.sets === 'number' ? ex.sets : 5), 0);
+            const completed = document.querySelectorAll('.check-box.checked').length;
+            
+            document.getElementById('statExercises').textContent = currentWorkout.exercises.length;
+            document.getElementById('statSets').textContent = totalSets;
+            document.getElementById('statCompleted').textContent = completed;
+        }
+
+        function destroyAll() {
+            const boxes = document.querySelectorAll('.check-box');
+            let delay = 0;
+            boxes.forEach((box, idx) => {
+                if (!box.classList.contains('checked')) {
+                    setTimeout(() => box.click(), delay);
+                    delay += 50;
+                }
+            });
+            
+            const btn = document.getElementById('destroyBtn');
+            const originalText = btn.textContent;
+            btn.textContent = "ALL SETS DESTROYED!";
+            btn.style.background = "#0f0";
+            btn.style.color = "#000";
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = "";
+                btn.style.color = "";
+            }, 2000);
+        }
+
+        function closePanel() {
+            document.getElementById('workoutPanel').classList.remove('show');
+            document.querySelectorAll('.calendar-day').forEach(el => el.classList.remove('active'));
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+            closePanel();
+        }
+
+        // Initialize
+        rotateRage();
+        renderCalendar();
+        
+        // Auto-rotate rage every 8 seconds
+        setInterval(() => {
+            if (Math.random() > 0.5) rotateRage();
+        }, 8000);
+        
+        // Swipe to change month on mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) changeMonth(1);
+            if (touchEndX > touchStartX + 50) changeMonth(-1);
+        }
+    </script>
 </body>
 </html>
